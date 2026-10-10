@@ -1,0 +1,50 @@
+<view class="container">
+  <!-- Messages area -->
+  <scroll-view class="messages" scroll-into-view="msg-bottom" scroll-with-animation>
+    <!-- Empty state -->
+    <view wx:if="{{messages.length === 0}}" class="empty-state">
+      <view class="empty-icon">A</view>
+      <text class="empty-text">Ask me anything. I can search, calculate, and more.</text>
+    </view>
+
+    <!-- Message list -->
+    <view wx:for="{{messages}}" wx:key="id" id="msg-{{index}}" class="msg-row {{item.role === 'user' ? 'msg-user' : 'msg-assistant'}}">
+      <view class="bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-assistant'}}">
+        <text class="bubble-text" wx:if="{{item.content}}">{{item.content}}</text>
+        <text class="bubble-text thinking" wx:elif="{{item.streaming}}">Thinking...</text>
+
+        <!-- Tool calls -->
+        <view class="tool-calls" wx:if="{{item.toolCalls && item.toolCalls.length > 0}}">
+          <view class="tool-card" wx:for="{{item.toolCalls}}" wx:for-item="tc" wx:key="id" data-id="{{tc.id}}" bindtap="toggleTool">
+            <view class="tool-card-header">
+              <text class="tool-name">{{tc.tool}}</text>
+              <text class="tool-status">{{tc.status === 'done' ? '✓' : tc.status === 'running' ? '...' : '?'}}</text>
+            </view>
+            <view class="tool-detail" wx:if="{{tc.expanded}}">
+              <text class="tool-args">Args: {{JSON.stringify(tc.args)}}</text>
+              <text class="tool-result" wx:if="{{tc.result}}">Result: {{tc.result}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+    <view id="msg-bottom" style="height: 20rpx;"></view>
+  </scroll-view>
+
+  <!-- Input area -->
+  <view class="input-area">
+    <input
+      class="input"
+      placeholder="Type a message..."
+      value="{{input}}"
+      bindinput="onInput"
+      bindconfirm="onSend"
+      confirm-type="send"
+      disabled="{{isStreaming}}"
+    />
+    <button wx:if="{{isStreaming}}" class="btn btn-stop" bindtap="onStop">Stop</button>
+    <button wx:else class="btn btn-send {{input ? 'active' : ''}}" bindtap="onSend">
+      <text>Send</text>
+    </button>
+  </view>
+</view>

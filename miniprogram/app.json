@@ -1,0 +1,12 @@
+{
+  "pages": [
+    "pages/chat/chat"
+  ],
+  "window": {
+    "navigationBarTitleText": "Agent",
+    "navigationBarBackgroundColor": "#0f0f17",
+    "navigationBarTextStyle": "white",
+    "backgroundColor": "#0f0f17"
+  },
+  "sitemapLocation": "sitemap.json"
+}
