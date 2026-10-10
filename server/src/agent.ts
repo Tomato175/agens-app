@@ -52,7 +52,7 @@ Default report format (unless the user asks for something else):
 ## Analysis
 ## Sources
 
-Attach the URL you relied on next to each claim. Always respond in the user's language.`;
+Search budget: use at most 3 web_search calls and 4 web_scrape calls, then WRITE the report with the material you have. If searches fail or results are weak, do not keep retrying - write the report from the best-available sources and mark uncertainty explicitly. Attach the URL you relied on next to each claim. Always respond in the user's language.`;
 
 function buildSystemPrompt(systemPrompt?: string): string {
   const memoryCtx = getMemoryContext();
@@ -78,7 +78,7 @@ export async function* runAgent(
     ...messages,
   ];
 
-  const maxIterations = 10;
+  const maxIterations = 20;
 
   for (let i = 0; i < maxIterations; i++) {
     const stream = await client.chat.completions.create({
