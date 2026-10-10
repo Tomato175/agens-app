@@ -12,9 +12,15 @@ function loadConvs(): Conversation[] {
   }
 }
 
+const ACTIVE_KEY = 'agent_active_conv';
+
 export function useHistory() {
   const [conversations, setConversations] = useState<Conversation[]>(loadConvs);
-  const [activeId, setActiveId] = useState('');
+  const [activeId, setActiveId] = useState(() => localStorage.getItem(ACTIVE_KEY) ?? '');
+
+  useEffect(() => {
+    localStorage.setItem(ACTIVE_KEY, activeId);
+  }, [activeId]);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations.slice(0, 50)));

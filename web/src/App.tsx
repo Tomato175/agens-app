@@ -32,6 +32,14 @@ export default function App() {
 
   useEffect(() => { bottomRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
   useEffect(() => { checkHealth().then(setHealth); }, []);
+
+  // Resume the last active conversation on load (ids persist in localStorage)
+  useEffect(() => {
+    if (!activeId) return;
+    const conv = conversations.find((c) => c.id === activeId);
+    if (conv && conv.messages.length > 0) loadMessages(conv.messages);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   useEffect(() => { if (model) localStorage.setItem('agent_model', model); }, [model]);
   useEffect(() => { if (imageModel) localStorage.setItem('agent_image_model', imageModel); }, [imageModel]);
   useEffect(() => { localStorage.setItem('agent_role', role); }, [role]);
