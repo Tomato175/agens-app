@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import MessageBubble from './components/MessageBubble';
 import ModelSelector from './components/ModelSelector';
+import RoleSelector from './components/RoleSelector';
 import Sidebar from './components/Sidebar';
 import ThemeToggle from './components/ThemeToggle';
 import LoadingScreen from './components/LoadingScreen';
@@ -16,6 +17,7 @@ export default function App() {
   const [mode, setMode] = useState<ChatMode>('chat');
   const [model, setModel] = useState(() => localStorage.getItem('agent_model') ?? 'agnes-3.0-flash');
   const [imageModel, setImageModel] = useState(() => localStorage.getItem('agent_image_model') ?? 'agnes-image-2.5-flash');
+  const [role, setRole] = useState(() => localStorage.getItem('agent_role') ?? '');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('agent_theme') !== 'light');
   const [health, setHealth] = useState<{ status: string; model: string; hasApiKey: boolean } | null>(null);
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -32,6 +34,7 @@ export default function App() {
   useEffect(() => { checkHealth().then(setHealth); }, []);
   useEffect(() => { if (model) localStorage.setItem('agent_model', model); }, [model]);
   useEffect(() => { if (imageModel) localStorage.setItem('agent_image_model', imageModel); }, [imageModel]);
+  useEffect(() => { localStorage.setItem('agent_role', role); }, [role]);
 
   useEffect(() => {
     if (activeId && messages.length > 0) {
@@ -46,7 +49,7 @@ export default function App() {
     if (!activeId || messages.length === 0) {
       addConversation(text.slice(0, 40));
     }
-    send(text, mode, model, imageModel);
+    send(text, mode, model, imageModel, role);
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
@@ -112,6 +115,7 @@ export default function App() {
             {health && !health.hasApiKey && (
               <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] text-amber-400">No API Key</span>
             )}
+            <RoleSelector value={role} onChange={setRole} />
             <ModelSelector
               selected={mode === 'image' ? imageModel : model}
               onSelect={(m) => { if (mode === 'image') setImageModel(m); else setModel(m); }}

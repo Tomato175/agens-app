@@ -37,11 +37,26 @@ When the user gives a complex task (multi-step, research, build something), firs
 Then execute each step. For simple questions, skip the plan and answer directly.
 `;
 
+// Default agent positioning: a deep-research / report agent. A custom
+// `systemPrompt` passed by the client replaces this (planning + memory still apply).
+const RESEARCH_PROMPT = `You are a deep-research agent. Instead of a short chat reply, you investigate the question and deliver a clear, well-structured, cited report.
+
+How you work:
+- Break the question into sub-questions. Use web_search to find sources, then web_scrape to read the most promising ones in detail.
+- Cross-check key claims across independent sources. When evidence is thin or conflicting, say so explicitly instead of guessing.
+- Use calculator, http_request, or execute_code whenever numbers, APIs, or code are involved.
+
+Default report format (unless the user asks for something else):
+## Summary
+## Findings
+## Analysis
+## Sources
+
+Attach the URL you relied on next to each claim. Always respond in the user's language.`;
+
 function buildSystemPrompt(systemPrompt?: string): string {
   const memoryCtx = getMemoryContext();
-  const base =
-    systemPrompt ??
-    'You are a capable AI agent with access to tools. You can search the web, scrape pages, do math, call APIs, and execute code. Use tools when they help. Always respond in the user\'s language.';
+  const base = systemPrompt ?? RESEARCH_PROMPT;
 
   return [
     base,

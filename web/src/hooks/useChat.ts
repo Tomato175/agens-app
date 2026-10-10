@@ -19,7 +19,7 @@ export function useChat() {
   }, []);
 
   const send = useCallback(
-    async (content: string, mode: ChatMode, model?: string, imageModel?: string) => {
+    async (content: string, mode: ChatMode, model?: string, imageModel?: string, systemPrompt?: string) => {
       const userMsg: ChatMessage = { id: nextId(), role: 'user', content };
       const assistantMsgId = nextId();
       const assistantMsg: ChatMessage = {
@@ -96,6 +96,7 @@ export function useChat() {
             },
             controller.signal,
             model,
+            systemPrompt,
           );
         }
       } catch (err) {

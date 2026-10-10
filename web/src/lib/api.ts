@@ -10,9 +10,11 @@ export async function streamChat(
   onEvent: (event: AgentEvent) => void,
   signal?: AbortSignal,
   model?: string,
+  systemPrompt?: string,
 ): Promise<void> {
   const body: Record<string, unknown> = { messages };
   if (model) body.model = model;
+  if (systemPrompt) body.systemPrompt = systemPrompt;
 
   const resp = await fetch(`${API_BASE}/stream`, {
     method: 'POST',
