@@ -1,88 +1,89 @@
 export default function LoadingScreen() {
   return (
-    <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden">
-      {/* Grid background */}
-      <div
-        className="absolute z-[-1]"
-        style={{
-          width: '800px',
-          height: '800px',
-          backgroundImage:
-            'linear-gradient(to right, rgba(99,102,241,0.06) 1px, transparent 1px),' +
-            'linear-gradient(to bottom, rgba(99,102,241,0.06) 1px, transparent 1px)',
-          backgroundSize: '1rem 1rem',
-          backgroundPosition: 'center center',
-          filter: 'blur(1px)',
-        }}
-      />
-
-      {/* Rotating glow "car" */}
-      <div className="relative">
-        {/* Outer glow */}
-        <div
-          className="absolute rounded-xl"
-          style={{
-            inset: '-30px',
-            overflow: 'hidden',
-            filter: 'blur(30px)',
-            opacity: 0.5,
-          }}
-        >
-          <div
-            className="absolute"
-            style={{
-              width: '300px',
-              height: '300px',
-              top: '-60px',
-              left: '-60px',
-              background: 'conic-gradient(transparent, #cf30aa 10%, transparent 20%, transparent 50%, #402fb5 60%, transparent 70%)',
-              animation: 'car-spin 3s linear infinite',
-            }}
-          />
+    <div className="flex h-full w-full flex-col items-center justify-center">
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+        <div className="truck-wrap">
+          {/* Truck body */}
+          <div className="truck-body">
+            <svg width="130" height="60" viewBox="0 0 130 60" fill="none">
+              <rect x="0" y="10" width="80" height="40" rx="4" fill="#1e1b4b" stroke="#6366f1" strokeWidth="1.5" />
+              <rect x="8" y="18" width="64" height="24" rx="2" fill="#312e81" opacity="0.5" />
+              <text x="40" y="34" textAnchor="middle" fill="#a78bfa" fontSize="10" fontWeight="bold" fontFamily="system-ui">AGENT</text>
+              <path d="M80 20 L110 20 Q115 20 115 25 L115 50 L80 50 Z" fill="#312e81" stroke="#818cf8" strokeWidth="1.5" />
+              <rect x="88" y="26" width="18" height="14" rx="2" fill="#818cf8" opacity="0.3" />
+              <circle cx="112" cy="45" r="3" fill="#fbbf24" />
+              <rect x="5" y="5" width="4" height="8" rx="1" fill="#475569" />
+            </svg>
+          </div>
+          {/* Tires */}
+          <div className="truck-tires">
+            <svg width="24" height="24" viewBox="0 0 24 24" style={{ animation: 'wheel-spin 0.8s linear infinite' }}>
+              <circle cx="12" cy="12" r="10" fill="#0f172a" stroke="#334155" strokeWidth="2" />
+              <circle cx="12" cy="12" r="4" fill="#475569" />
+              <line x1="12" y1="2" x2="12" y2="6" stroke="#64748b" strokeWidth="1.5" />
+              <line x1="12" y1="18" x2="12" y2="22" stroke="#64748b" strokeWidth="1.5" />
+            </svg>
+            <svg width="24" height="24" viewBox="0 0 24 24" style={{ animation: 'wheel-spin 0.8s linear infinite' }}>
+              <circle cx="12" cy="12" r="10" fill="#0f172a" stroke="#334155" strokeWidth="2" />
+              <circle cx="12" cy="12" r="4" fill="#475569" />
+              <line x1="12" y1="2" x2="12" y2="6" stroke="#64748b" strokeWidth="1.5" />
+              <line x1="12" y1="18" x2="12" y2="22" stroke="#64748b" strokeWidth="1.5" />
+            </svg>
+          </div>
+          {/* Road */}
+          <div className="road-line" />
         </div>
-
-        {/* Border glow */}
-        <div
-          className="absolute rounded-xl"
-          style={{
-            inset: '-3px',
-            overflow: 'hidden',
-            filter: 'blur(1px)',
-          }}
-        >
-          <div
-            className="absolute"
-            style={{
-              width: '200px',
-              height: '200px',
-              top: '-20px',
-              left: '-20px',
-              background: 'conic-gradient(#1c191c, #cf30aa 8%, #1c191c 15%, #1c191c 50%, #402fb5 58%, #1c191c 65%)',
-              animation: 'car-spin 4s linear infinite',
-            }}
-          />
-        </div>
-
-        {/* Center logo */}
-        <div className="relative flex h-14 w-14 items-center justify-center rounded-xl bg-[#0d0b16] ring-1 ring-indigo-500/20">
-          <span className="text-2xl font-bold bg-gradient-to-r from-pink-400 to-violet-400 bg-clip-text text-transparent">
-            A
-          </span>
-        </div>
+        <p style={{ marginTop: '16px', fontSize: '12px', color: '#64748b' }}>Agent is loading...</p>
       </div>
-
-      <p className="mt-6 text-sm text-slate-500">Loading Agent...</p>
-
-      <div className="mt-3 flex gap-1.5">
-        <span className="stream-dot h-2 w-2 rounded-full bg-pink-400" />
-        <span className="stream-dot h-2 w-2 rounded-full bg-violet-400" />
-        <span className="stream-dot h-2 w-2 rounded-full bg-indigo-400" />
-      </div>
-
       <style>{`
-        @keyframes car-spin {
+        .truck-wrap {
+          width: 200px; height: 100px;
+          display: flex; flex-direction: column;
+          position: relative; align-items: center; justify-content: flex-end;
+          overflow-x: hidden;
+        }
+        .truck-body {
+          width: 130px; height: fit-content; margin-bottom: 6px;
+          animation: truck-motion 1s linear infinite;
+        }
+        @keyframes truck-motion {
+          0% { transform: translateY(0); }
+          50% { transform: translateY(3px); }
+          100% { transform: translateY(0); }
+        }
+        .truck-tires {
+          width: 130px; display: flex; align-items: center;
+          justify-content: space-between; padding: 0 10px 0 15px;
+          position: absolute; bottom: 12px;
+        }
+        @keyframes wheel-spin {
           from { transform: rotate(0deg); }
           to { transform: rotate(360deg); }
+        }
+        .road-line {
+          width: 200px; height: 1.5px;
+          background: #334155; position: relative;
+          bottom: 10px; border-radius: 3px;
+        }
+        .road-line::before {
+          content: ""; position: absolute;
+          width: 20px; height: 100%;
+          background: #334155; right: -20%;
+          border-radius: 3px;
+          animation: road-anim 1.4s linear infinite;
+          border-left: 10px solid rgba(255,255,255,0.25);
+        }
+        .road-line::after {
+          content: ""; position: absolute;
+          width: 10px; height: 100%;
+          background: #334155; right: -45%;
+          border-radius: 3px;
+          animation: road-anim 1.4s linear infinite;
+          border-left: 4px solid rgba(255,255,255,0.15);
+        }
+        @keyframes road-anim {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(-350px); }
         }
       `}</style>
     </div>
