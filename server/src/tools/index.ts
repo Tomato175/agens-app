@@ -14,6 +14,7 @@ import { webScrapeTool } from './webScrape.js';
 import { calculatorTool } from './calculator.js';
 import { httpRequestTool } from './httpRequest.js';
 import { codeExecutorTool } from './codeExecutor.js';
+import { makePptxTool } from './pptx.js';
 
 export const tools: ToolDefinition[] = [
   webSearchTool,
@@ -21,6 +22,7 @@ export const tools: ToolDefinition[] = [
   calculatorTool,
   httpRequestTool,
   codeExecutorTool,
+  makePptxTool,
 ];
 
 export function getOpenAIToolDefinitions() {
