@@ -1,6 +1,7 @@
 import type { ToolDefinition } from './index.js';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { writeFileSync, unlinkSync } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
@@ -27,7 +28,6 @@ export const codeExecutorTool: ToolDefinition = {
     const tmpFile = path.join(__dirname, `tmp_code_${Date.now()}.${lang === 'javascript' ? 'js' : 'py'}`);
 
     try {
-      const { writeFileSync, unlinkSync } = await import('fs');
       writeFileSync(tmpFile, code, 'utf-8');
 
       const result = await execAsync(
