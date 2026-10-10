@@ -1,6 +1,9 @@
 import type { AgentEvent } from './types';
 
-const API_BASE = '/api';
+// In dev, /api is proxied to the local backend by Vite.
+// For static hosting (GitHub Pages), set VITE_API_BASE at build time to the
+// public URL of the hosted backend, e.g. VITE_API_BASE=https://agent-server.onrender.com
+const API_BASE = (import.meta.env.VITE_API_BASE as string | undefined) ?? '/api';
 
 export async function streamChat(
   messages: Array<{ role: string; content: string }>,
