@@ -13,7 +13,8 @@
     "express": "^4.21.0",
     "mathjs": "^14.0.0",
     "openai": "^4.77.0",
-    "pptxgenjs": "^4.0.1"
+    "pptxgenjs": "^4.0.1",
+    "undici": "^8.11.2"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
