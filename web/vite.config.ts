@@ -10,6 +10,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': 'http://localhost:3000',
+      // Relative PPT download links resolve to the local backend in dev
+      '/pptx': 'http://localhost:3000',
     },
   },
 });

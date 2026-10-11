@@ -8,7 +8,15 @@ import LoadingScreen from './components/LoadingScreen';
 import { useChat } from './hooks/useChat';
 import { useHistory } from './hooks/useHistory';
 import { checkHealth } from './lib/api';
+import { PPT_TEACHER_PROMPT } from './lib/pptRole';
 import type { ChatMode } from './lib/types';
+
+const PPT_SUGGESTIONS = [
+  '高一语文《赤壁赋》公开课课件，15 分钟，突出文本赏析与提问设计',
+  '高二历史《辛亥革命》新课 PPT，含史料研读与小组活动',
+  '高中政治《经济与社会》期末复习课件，配典型例题',
+  '英语文学导读 PPT：The Great Gatsby 的主题与象征手法',
+];
 
 export default function App() {
   const { messages, isStreaming, send, stop, clear, loadMessages } = useChat();
@@ -20,7 +28,7 @@ export default function App() {
   const [role, setRole] = useState(() => localStorage.getItem('agent_role') ?? '');
   const [darkMode, setDarkMode] = useState(() => localStorage.getItem('agent_theme') !== 'light');
   const [health, setHealth] = useState<{ status: string; model: string; hasApiKey: boolean } | null>(null);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(() => typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches);
   const [loading, setLoading] = useState(true);
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
@@ -57,7 +65,9 @@ export default function App() {
     if (!activeId || messages.length === 0) {
       addConversation(text.slice(0, 40));
     }
-    send(text, mode, model, imageModel, role);
+    // PPT mode always uses the built-in PPT-teacher persona (超级无敌大番茄);
+    // the custom RoleSelector prompt only applies to plain chat mode.
+    send(text, mode, model, imageModel, mode === 'ppt' ? PPT_TEACHER_PROMPT : role);
     requestAnimationFrame(() => inputRef.current?.focus());
   };
 
@@ -65,11 +75,18 @@ export default function App() {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
   };
 
+  const closeSidebarOnMobile = () => {
+    if (typeof window !== 'undefined' && window.matchMedia('(max-width: 767px)').matches) {
+      setSidebarOpen(false);
+    }
+  };
+
   const handleNewChat = () => {
     clear();
     setActiveId('');
     setMode('chat');
     setLoading(true);
+    closeSidebarOnMobile();
     setTimeout(() => setLoading(false), 800);
     requestAnimationFrame(() => inputRef.current?.focus());
   };
@@ -78,6 +95,7 @@ export default function App() {
     const conv = conversations.find((c) => c.id === id);
     if (conv) { loadMessages(conv.messages || []); setActiveId(id); }
     else { clear(); setActiveId(''); }
+    closeSidebarOnMobile();
   };
 
   const hasMessages = messages.length > 0;
@@ -101,9 +119,10 @@ export default function App() {
         onSelect={handleSelectConv}
         onDelete={(id) => deleteConversation(id)}
       />
+      {sidebarOpen && <div className="sidebar-backdrop" onClick={() => setSidebarOpen(false)} />}
 
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
+        <header className="app-header flex items-center justify-between border-b border-white/[0.06] px-4 py-3">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -115,7 +134,7 @@ export default function App() {
                 <path className="line" d="M4 22h24" />
               </svg>
             </button>
-            <span className="text-sm font-medium text-slate-300">
+            <span className="conv-title text-sm font-medium text-slate-300">
               {conversations.find((c) => c.id === activeId)?.title ?? 'New Chat'}
             </span>
           </div>
@@ -123,7 +142,7 @@ export default function App() {
             {health && !health.hasApiKey && (
               <span className="rounded-full bg-amber-500/10 px-2.5 py-0.5 text-[10px] text-amber-400">No API Key</span>
             )}
-            <RoleSelector value={role} onChange={setRole} />
+            {mode !== 'ppt' && <RoleSelector value={role} onChange={setRole} />}
             <ModelSelector
               selected={mode === 'image' ? imageModel : model}
               onSelect={(m) => { if (mode === 'image') setImageModel(m); else setModel(m); }}
@@ -138,27 +157,52 @@ export default function App() {
           <div className="mx-auto max-w-3xl px-4 py-6">
             {!hasMessages ? (
               <div className="flex h-full flex-col items-center justify-center py-16">
-                <div className="float-anim mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-600/15 ring-1 ring-indigo-500/20 shadow-xl shadow-indigo-500/10">
-                  <span className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">A</span>
-                </div>
-                <h1 className="text-xl font-semibold text-slate-200">What would you like to do?</h1>
-                <p className="mt-1.5 text-sm text-slate-500">Chat, search, code, or generate images.</p>
-                <div className="mt-8 grid w-full max-w-lg grid-cols-2 gap-2.5">
-                  {[
-                    { label: 'Chat', desc: 'Ask anything', action: () => { setMode('chat'); inputRef.current?.focus(); } },
-                    { label: 'Image', desc: 'Generate art', action: () => { setMode('image'); inputRef.current?.focus(); } },
-                    { label: 'Code', desc: 'Write & run', action: () => { setMode('chat'); setInput('Write code to '); inputRef.current?.focus(); } },
-                    { label: 'Research', desc: 'Search & analyze', action: () => { setMode('chat'); setInput('Research: '); inputRef.current?.focus(); } },
-                  ].map((s) => (
-                    <button key={s.label} onClick={s.action} className="card-lift flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-left backdrop-blur-sm">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-sm font-bold text-pink-400">{s.label[0]}</div>
-                      <div>
-                        <p className="text-sm font-medium text-slate-300">{s.label}</p>
-                        <p className="text-[11px] text-slate-500">{s.desc}</p>
-                      </div>
-                    </button>
-                  ))}
-                </div>
+                {mode === 'ppt' ? (
+                  <>
+                    <div className="float-anim mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-rose-500/15 to-orange-500/15 ring-1 ring-rose-500/20 shadow-xl shadow-rose-500/10">
+                      <span className="text-3xl">🍅</span>
+                    </div>
+                    <h1 className="text-xl font-semibold text-slate-200">文科 PPT 助手</h1>
+                    <p className="mt-1.5 text-center text-sm text-slate-500">
+                      我是超级无敌大番茄——老师说需求，我一步步完善，直接生成可下载的 PPT。
+                    </p>
+                    <div className="mt-8 grid w-full max-w-lg grid-cols-1 gap-2.5">
+                      {PPT_SUGGESTIONS.map((s) => (
+                        <button
+                          key={s}
+                          onClick={() => { setInput(s); inputRef.current?.focus(); }}
+                          className="card-lift rounded-xl border border-white/[0.06] bg-white/[0.02] p-3 text-left backdrop-blur-sm"
+                        >
+                          <span className="text-sm text-slate-300">{s}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="float-anim mb-6 flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500/15 to-violet-600/15 ring-1 ring-indigo-500/20 shadow-xl shadow-indigo-500/10">
+                      <span className="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-violet-400 bg-clip-text text-transparent">A</span>
+                    </div>
+                    <h1 className="text-xl font-semibold text-slate-200">What would you like to do?</h1>
+                    <p className="mt-1.5 text-sm text-slate-500">Chat, search, code, or generate images.</p>
+                    <div className="mt-8 grid w-full max-w-lg grid-cols-1 gap-2.5 sm:grid-cols-2">
+                      {[
+                        { label: 'Chat', desc: 'Ask anything', action: () => { setMode('chat'); inputRef.current?.focus(); } },
+                        { label: 'Image', desc: 'Generate art', action: () => { setMode('image'); inputRef.current?.focus(); } },
+                        { label: 'Code', desc: 'Write & run', action: () => { setMode('chat'); setInput('Write code to '); inputRef.current?.focus(); } },
+                        { label: 'Research', desc: 'Search & analyze', action: () => { setMode('chat'); setInput('Research: '); inputRef.current?.focus(); } },
+                      ].map((s) => (
+                        <button key={s.label} onClick={s.action} className="card-lift flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 text-left backdrop-blur-sm">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white/[0.04] text-sm font-bold text-pink-400">{s.label[0]}</div>
+                          <div>
+                            <p className="text-sm font-medium text-slate-300">{s.label}</p>
+                            <p className="text-[11px] text-slate-500">{s.desc}</p>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </>
+                )}
               </div>
             ) : (
               <>
@@ -185,6 +229,12 @@ export default function App() {
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="3" width="18" height="18" rx="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="M21 15l-5-5L5 21" /></svg>
                   </label>
                 </li>
+                <li className="nav-li">
+                  <input type="radio" name="mode" id="mode-ppt" className="nav-radio" checked={mode === 'ppt'} onChange={() => setMode('ppt')} />
+                  <label htmlFor="mode-ppt" className="nav-label" title="文科 PPT 助手（超级无敌大番茄）">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><rect x="3" y="4" width="18" height="12" rx="2" /><path d="M8 20h8M12 16v4" /></svg>
+                  </label>
+                </li>
               </ul>
             </div>
 
@@ -198,7 +248,13 @@ export default function App() {
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={mode === 'image' ? 'Describe an image...' : 'Type a message...'}
+                    placeholder={
+                      mode === 'image'
+                        ? 'Describe an image...'
+                        : mode === 'ppt'
+                          ? '说说你要的 PPT，例如：高一语文《赤壁赋》公开课课件，15 分钟…'
+                          : 'Type a message...'
+                    }
                     rows={1}
                     className="w-full resize-none bg-transparent px-4 py-3.5 text-sm text-slate-200 outline-none placeholder:text-slate-500"
                   />

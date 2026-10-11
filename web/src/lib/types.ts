@@ -1,4 +1,4 @@
-export type ChatMode = 'chat' | 'image';
+export type ChatMode = 'chat' | 'image' | 'ppt';
 
 export interface ChatMessage {
   id: string;

@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import type { ChatMessage, ToolCallDisplay } from '../lib/types';
+import { apiOrigin } from '../lib/api';
 
 const toolLabels: Record<string, string> = {
   web_search: 'Search', web_scrape: 'Scrape', calculator: 'Math',
   http_request: 'HTTP', execute_code: 'Code',
+  make_pptx: 'PPT', github_search: 'GitHub', github_fetch: 'Fetch',
 };
 
 const toolColors: Record<string, string> = {
@@ -12,6 +14,9 @@ const toolColors: Record<string, string> = {
   calculator: 'text-emerald-400 bg-emerald-500/10',
   http_request: 'text-rose-400 bg-rose-500/10',
   execute_code: 'text-violet-400 bg-violet-500/10',
+  make_pptx: 'text-orange-400 bg-orange-500/10',
+  github_search: 'text-sky-400 bg-sky-500/10',
+  github_fetch: 'text-teal-400 bg-teal-500/10',
 };
 
 function PlanCard({ steps }: { steps: string[] }) {
@@ -40,6 +45,11 @@ function PlanCard({ steps }: { steps: string[] }) {
 function ToolCallCard({ tc }: { tc: ToolCallDisplay }) {
   const [expanded, setExpanded] = useState(false);
   const colorCls = toolColors[tc.tool] ?? 'text-slate-400 bg-slate-500/10';
+  // make_pptx results carry a download URL (absolute, or relative to the API host) - shown as a button
+  const rawPptUrl = tc.result
+    ? (tc.result.match(/https?:\/\/\S+\.pptx/i) ?? tc.result.match(/\/pptx\/[A-Za-z0-9._-]+\.pptx/))?.[0]
+    : undefined;
+  const pptUrl = rawPptUrl ? (rawPptUrl.startsWith('http') ? rawPptUrl : apiOrigin() + rawPptUrl) : undefined;
 
   return (
     <div className={`card-lift cursor-pointer rounded-lg border border-white/[0.06] bg-white/[0.02] ${expanded ? 'border-white/[0.12]' : ''}`} onClick={() => setExpanded(!expanded)}>
@@ -56,6 +66,18 @@ function ToolCallCard({ tc }: { tc: ToolCallDisplay }) {
       </div>
       {expanded && (
         <div className="border-t border-white/[0.04] px-3 py-2">
+          {pptUrl && (
+            <a
+              href={pptUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="mb-2 flex w-full items-center justify-center gap-1.5 rounded-md bg-orange-500/15 px-3 py-1.5 text-xs font-medium text-orange-300 transition hover:bg-orange-500/25"
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 11-2 2H5a2 2 0 11-2-2v-4M7 10l5 5 5-5M12 15V3" /></svg>
+              下载 PPT（.pptx）
+            </a>
+          )}
           <div className="text-[11px] text-slate-500">
             <span className="font-medium text-slate-400">Args: </span>
             <code className="break-all">{JSON.stringify(tc.args)}</code>

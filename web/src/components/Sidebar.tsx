@@ -19,8 +19,8 @@ export default function Sidebar({ open, onNewChat, conversations, activeId, onSe
 
   return (
     <aside
-      className={`flex flex-col border-r border-white/[0.06] bg-white/[0.02] backdrop-blur-sm transition-all duration-200 ${
-        open ? 'w-64' : 'w-0 overflow-hidden border-r-0'
+      className={`sidebar-panel flex flex-col border-r border-white/[0.06] bg-white/[0.02] backdrop-blur-sm transition-all duration-200 ${
+        open ? 'w-64 sidebar-open' : 'w-0 overflow-hidden border-r-0'
       }`}
     >
       {/* New chat */}
@@ -84,7 +84,7 @@ export default function Sidebar({ open, onNewChat, conversations, activeId, onSe
             {onDelete && (
               <button
                 onClick={() => onDelete(c.id)}
-                className="mr-1 hidden rounded p-1 text-slate-600 hover:text-red-400 group-hover:block"
+                className="conv-del mr-1 hidden rounded p-1 text-slate-600 hover:text-red-400 group-hover:block"
                 title="Delete"
               >
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
