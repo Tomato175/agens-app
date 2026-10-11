@@ -15,6 +15,7 @@ import { calculatorTool } from './calculator.js';
 import { httpRequestTool } from './httpRequest.js';
 import { codeExecutorTool } from './codeExecutor.js';
 import { makePptxTool } from './pptx.js';
+import { githubSearchTool, githubFetchTool } from './github.js';
 
 export const tools: ToolDefinition[] = [
   webSearchTool,
@@ -23,6 +24,8 @@ export const tools: ToolDefinition[] = [
   httpRequestTool,
   codeExecutorTool,
   makePptxTool,
+  githubSearchTool,
+  githubFetchTool,
 ];
 
 export function getOpenAIToolDefinitions() {

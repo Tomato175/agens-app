@@ -4,6 +4,7 @@ import chatRouter from './routes/chat.js';
 import healthRouter from './routes/health.js';
 import modelsRouter from './routes/models.js';
 import imagesRouter from './routes/images.js';
+import rolesRouter from './routes/roles.js';
 
 const app = express();
 const PORT = parseInt(process.env.PORT ?? '3000', 10);
@@ -15,6 +16,7 @@ app.use('/api', chatRouter);
 app.use('/api', healthRouter);
 app.use('/api', modelsRouter);
 app.use('/api', imagesRouter);
+app.use('/api', rolesRouter);
 
 // Serve generated PPTX files (created by the make_pptx tool)
 import { existsSync } from 'fs';
@@ -33,7 +35,7 @@ app.get('/pptx/:name', (req, res) => {
 });
 
 app.get('/', (_req, res) => {
-  res.json({ name: 'Agent Server', version: '1.0.1' });
+  res.json({ name: 'Agent Server', version: '1.1.0' });
 });
 
 app.listen(PORT, () => {
