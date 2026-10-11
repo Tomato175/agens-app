@@ -17,8 +17,10 @@ export async function streamChat(
   if (systemPrompt) body.systemPrompt = systemPrompt;
   const bodyJson = JSON.stringify(body);
 
-  // Free-tier Render backends can cold-start or 405 at the edge while a new
-  // deploy is settling: retry transient failures once after a short wait.
+  // Free-tier Render backends spin down after ~15 min idle; the first request
+  // cold-starts for up to ~50s and the edge answers 405/5xx meanwhile.
+  // Retry with escalating waits (total ~48s) before giving up.
+  const RETRY_WAIT_MS = [8000, 15000, 25000];
   let resp: Response;
   for (let attempt = 0; ; attempt++) {
     resp = await fetch(`${API_BASE}/stream`, {
@@ -27,15 +29,18 @@ export async function streamChat(
       body: bodyJson,
       signal,
     });
-    if ((resp.status === 405 || resp.status >= 500) && attempt === 0 && !signal?.aborted) {
-      await new Promise((r) => setTimeout(r, 4000));
+    const transient = resp.status === 405 || resp.status === 408 || resp.status >= 500;
+    if (transient && attempt < RETRY_WAIT_MS.length && !signal?.aborted) {
+      await new Promise((r) => setTimeout(r, RETRY_WAIT_MS[attempt]));
       continue;
     }
     break;
   }
 
   if (!resp.ok) {
-    let errMsg = `Server error (${resp.status})`;
+    let errMsg = resp.status === 405 || resp.status === 503
+      ? 'Backend is busy waking up (free-tier cold start) - wait a minute and try again (服务器正在唤醒，约 1 分钟后重试)'
+      : `Server error (${resp.status})`;
     try {
       const err = await resp.json();
       if (err.error) errMsg = err.error;
