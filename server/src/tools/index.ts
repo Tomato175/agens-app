@@ -16,6 +16,7 @@ import { httpRequestTool } from './httpRequest.js';
 import { codeExecutorTool } from './codeExecutor.js';
 import { makePptxTool } from './pptx.js';
 import { githubSearchTool, githubFetchTool } from './github.js';
+import { generateImageTool, imageSearchTool } from './image.js';
 
 export const tools: ToolDefinition[] = [
   webSearchTool,
@@ -26,6 +27,8 @@ export const tools: ToolDefinition[] = [
   makePptxTool,
   githubSearchTool,
   githubFetchTool,
+  generateImageTool,
+  imageSearchTool,
 ];
 
 export function getOpenAIToolDefinitions() {

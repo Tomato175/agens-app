@@ -21,10 +21,10 @@ export function getLLMConfig(): LLMConfig {
   };
 }
 
-// Outbound proxy for LLM requests. When HTTPS_PROXY/HTTP_PROXY is set (e.g.
-// local Clash at 127.0.0.1:7890) we route the OpenAI client's fetch through
-// it, because the default Node fetch can be reset/blocked on some hosts.
-// Unset on hosted runs (Render), so behavior there is unchanged.
+// Outbound proxy. When HTTPS_PROXY/HTTP_PROXY is set (e.g. local Clash at
+// 127.0.0.1:7890) we route outbound fetch through it, because the default Node
+// fetch can be reset/blocked on some hosts. Unset on hosted runs (Render), so
+// behavior there is unchanged.
 let cachedProxyFetch: typeof globalThis.fetch | undefined;
 
 function resolveProxyFetch(): typeof globalThis.fetch | undefined {
@@ -48,4 +48,10 @@ export function createLLMClient(config?: LLMConfig): OpenAI {
     baseURL: cfg.baseUrl,
     ...(customFetch ? { fetch: customFetch } : {}),
   });
+}
+
+// Shared network fetch for tools that hit the internet (image search, remote
+// image download). Routes through the proxy when configured, else native fetch.
+export function getNetworkFetch(): typeof globalThis.fetch {
+  return resolveProxyFetch() ?? globalThis.fetch;
 }
